@@ -1,0 +1,200 @@
+Title: Gameroom Essential - Playcard System
+* Introduction
+
+Owner: I would like to add RFID to my machines as a card payment type
+system.
+
+When a person approaches a machine, they tap an rfid card. The
+attached pi/arduino checks a central database to see if there is
+credit sufficient to cover the cost of the game. If no, then beep and
+display insufficient credit. If yes, then the available credit is
+reduced by the cost of the machine and a pulse is sent to the machine
+to initiate a credit.
+
+A second area will have time based play where a customer can purchase
+1, 2, up to 7 hours play for a set rate with unlimited gaming.
+Customer taps the rfid on the machine, the pi/arduino checks a central
+database to see if the card has expired.  If still within the
+purchased time period, then a pulse is sent to the machine to initiate
+a credit. If not, then the machine will display card expired.
+
+The system could have a customer tier system where a VIP member could
+get a discount per game.
+
+Want to keep info like which games each card has played, how often
+each game is played, and other reporting. Find which games are
+earning the most money and how often a machine is played.
+
+Council will not allow us to use coins or tokens.
+
+** Questions
+
+1. What is being used at the moment? 
+
+  I have all my machines on free play at the moment and give out
+  coloured wristbands for different finishing times. An honest system
+  that many people are not honest.
+
+2. Rough idea of how much to spend per machine?
+
+  Initial budget of $20-$25 per machine which could increase with the addition of screens and features.
+
+3. Name for the project/system.
+
+4. How many machines?
+
+   Approximately 50 machines.
+
+  - Pay per play area of 15-20 machines, brand new machines plus prize
+    and ticket redemption machines.
+
+  - Timed/FreePlay area of 30 machines with pinball, shooting, driving
+    and fighting arcade games.
+
+5. How soon/time frame?
+
+  - The pay per play area would like up and running by 8th April
+    (before school holidays).
+  - Can be improved/finalised after this time.
+  - The timed/freeplay area can still run using wristbands until the system is implemented.
+
+* Comments
+  Installing a programmable device, which can be wired up to each machine 
+
+* Requirements
+- Machine Device
+- System Server
+- Query Station
+
+* Technology Options
+** Hardware
+*** Remote Relay
+- Cost: $43 (12 machines)
+- Can be installed in machines to remotely add credit.
+
+*** Arduino Board or Clone
+- Lilygo Board
+- ESP32 board, WiFi, Display (small)
+
+*** Raspberry Pi Zero W
+- Useful for game device
+
+*** Raspberry Pi 4
+- Might be useful for Query Station (with display) and even System Server
+
+*** Banana Pi
+- Alternative to Rasperry Pi 4
+
+*** NFC Card Reader
+- https://docs.google.com/document/d/1xuY3NUKf5GRZEbXlCmEDNMSlYUuKA9_6vlVmGwE_ed4/edit?usp=sharing
+- Cost: US$2.30
+- Freqency: 13.56MHz
+
+** Software
+- Operating System - Ubuntu, Raspbian
+- Database - MySQL, PostgreSQL
+- Messaging - MQTT
+- Control - NodeRed
+- Embedded software - C/C++
+
+** Networking
+- WiFi
+
+** Bluetooth
+
+** Other
+- Case
+- Machine interface/display with LEDs and/or buttons.
+- Connectors
+- Storage
+
+* Other discussion and brainstorming?
+- What about using the RFID functionality on phones?
+- What about scanning a QR Code on machine to add credit via an app?
+  - Or having an app/website which a person can use to add credit to a machine?
+
+- What about using a USB key with a USB port?
+- Is a printed receipt required?
+  - Does 'loading credit' onto the system require a printed receipt?
+
+- Changing operational mode of machine remotely.
+  - Free play
+  - Credit play
+    - Prepaided
+    - Time based
+  Would mode need to be displayed on the unit (eg. coloured LED)
+
+** System
+- How would system be installed?
+  - MicroSD Card imaging.
+  - Node serial number/MAC address
+  - Node registration
+- How would upgrading be done?
+  - Via server/git/ansible
+
+* References
+** Related Projects and Documentation
+- Raspberry Pi Attendance System - https://pimylifeup.com/raspberry-pi-rfid-attendance-system/
+- Setting up an RFID Card Reader - https://pimylifeup.com/raspberry-pi-rfid-rc522/
+- Wiring up a 16x2 LCD Display - https://pimylifeup.com/raspberry-pi-lcd-16x2/
+
+* Software Design
+** SQL Database
+
+#+begin_src text 
+  create database playcard;
+  use playcard;
+
+  create table machines (
+    id int unsigned not null auto_increment unique,
+    machine_uid varchar(255) not null,
+    machine_name varchar(255) not null,
+    created timestamp not null default current_timestamp,
+    primary key ( id )
+  );
+
+  create table members (
+    id int unsigned not null auto_increment unique,
+    rfid_uid varchar(255) not null,
+    name varchar(255) not null,
+    created timestamp not null default current_timestamp,
+    primary key ( id )
+  );
+
+  create table log (
+    id int unsigned not null auto_increment unique,
+    user_id int unsigned not null,
+    time_in timestamp not null default current_timestamp,
+    machine_uid varchar(255) not null,
+    action varchar(255) not null,
+    primary key ( id )
+  );
+#+end_src
+
+** NodeRED 
+Flow definitions
+
+Machine Node
+- Card Scan
+  -> Log/Send to Server via MQTT
+    -> Reply OK -> Add Credit/Display Success -> Log Status
+    -> Reply INVALID -> Display Error -> Log Status
+
+Server Node
+- Receive Query Message
+  -> Log query
+  -> Check Status/Credit
+     -> Log status
+     -> Reply to Query
+
+- Receive Log Message
+  -> Save Log message
+
+- Status
+  -> Display received messages
+
+- Add new node/machine
+- Remove node/machine
+
+- Add new card
+- Disable card
