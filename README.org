@@ -1,0 +1,33 @@
+* Playcard
+** Introduction
+This repository is for the design and code for the Playcard system.
+
+The Playcard System aims to be a cost effective, credit management system (time and value based) for video and computer game venues.
+
+The system is still under development but probably use the following:
+- RFID card and fobs to identify users
+- Wifi Networking
+- MQTT service for messaging
+- Node-Red for event processing
+- PosgreSQL database for data storage
+- InfuxDB for time-series tracking and monitoring
+- Graphana for status tracking
+
+The aim is to have a web based interface that can be accessed via a variety of devices for management and advanced user interaction.
+*** User Stories
+**** Using a card to interect with a machine
+**** Adding credit to a user account
+**** Adding time to a user account
+**** Issuing a card to a new user
+**** Re-issuing a card (lost or stolen)
+
+** Hardware
+*** Server
+TBD
+*** Admin Interface
+TBD
+*** Machine Unit/Interface
+
+** Software
+TBD
+

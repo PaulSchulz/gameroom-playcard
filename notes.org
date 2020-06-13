@@ -198,3 +198,11 @@ Server Node
 
 - Add new card
 - Disable card
+
+- Detect/enable new node
+
+** Node Installation
+- Install Image with Etcher.io
+- Enable SSH (touch /ssh)
+- Enable/Configure WiFi 
+  (/etc/wpa_supplicant/wpa_supplicant.conf)
